@@ -1,0 +1,40 @@
+# .gitignore for cobra-explorer
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of go coverage tool
+*.out
+coverage.html
+
+# Go workspace
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/bin/
+/dist/
+
+# Doc placeholder for demo GIF
+# doc/demo.gif should be committed when available
+
+# Throwaway GIF produced while rendering the theme screenshots
+doc/themes/_scratch.gif

@@ -1,0 +1,70 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  MODULE: github.com/oakwood-commons/cobra-explorer
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  test:
+    desc: Run all tests with race detection
+    cmds:
+      - go test -v -race ./...
+
+  cover:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -race -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report written to coverage.html"
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofmt -s -w .
+      - goimports -w -local {{.MODULE}} .
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  build:
+    desc: Build the library (verification only)
+    cmds:
+      - go build ./...
+
+  example:
+    desc: Run the demo example (launches the interactive explorer)
+    cmds:
+      - go run ./examples/basic/ explore
+
+  ci:
+    desc: Run all CI checks locally
+    deps: [fmt, vet, lint, test, build]
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -f coverage.out coverage.html
+      - go clean -testcache
+
+  mod:tidy:
+    desc: Tidy go module dependencies
+    cmds:
+      - go mod tidy
+
+  mod:verify:
+    desc: Verify module dependencies
+    cmds:
+      - go mod verify
