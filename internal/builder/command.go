@@ -79,8 +79,10 @@ func (bc *BuiltCommand) ToArgs() []string {
 
 // String renders the full command as a copy-pasteable string.
 func (bc *BuiltCommand) String() string {
-	parts := []string{bc.Node.FullPath[0]}
-	parts = append(parts, bc.ToArgs()...)
+	args := bc.ToArgs()
+	parts := make([]string, 0, 1+len(args))
+	parts = append(parts, bc.Node.FullPath[0])
+	parts = append(parts, args...)
 
 	var quoted []string
 	for _, p := range parts {
