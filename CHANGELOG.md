@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-05
+
 ### Fixed
 
 - In-process execution now captures output written directly to `os.Stdout` and
@@ -47,5 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `WithExecution`, and `WithThemeName`
 - Comprehensive test suite across all packages (builder, clipboard, executor, flaginput, layout, model, scrollbar, theme, tree, and the public `explore` API)
 
-[Unreleased]: https://github.com/oakwood-commons/cobra-explorer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/oakwood-commons/cobra-explorer/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/oakwood-commons/cobra-explorer/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/oakwood-commons/cobra-explorer/releases/tag/v0.1.0
