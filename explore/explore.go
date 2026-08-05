@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/spf13/cobra"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/model"
@@ -37,7 +37,9 @@ func Run(root *cobra.Command, opts ...Option) error {
 		ExecutionEnabled: cfg.executionEnabled,
 	})
 
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	// AltScreen is requested declaratively by the model's View(); NewProgram no
+	// longer takes a WithAltScreen option in bubbletea v2.
+	p := tea.NewProgram(m)
 	finalModel, err := p.Run()
 	if err != nil {
 		return err

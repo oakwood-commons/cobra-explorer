@@ -13,7 +13,7 @@ Every component follows this pattern:
 ```go
 package mycomponent
 
-import tea "github.com/charmbracelet/bubbletea"
+import tea "charm.land/bubbletea/v2"
 
 type Model struct {
     // State fields

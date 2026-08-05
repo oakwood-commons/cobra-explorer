@@ -24,7 +24,7 @@ An interactive TUI for any [Cobra](https://github.com/spf13/cobra)-based CLI app
 go get github.com/oakwood-commons/cobra-explorer
 ```
 
-Requires Go 1.22 or later.
+Requires Go 1.25 or later.
 
 ## Quick Start
 

@@ -3,7 +3,7 @@ package flaginput_test
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -11,37 +11,40 @@ import (
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
 
-// key builds a tea.KeyMsg from a string for tests.
-func key(s string) tea.KeyMsg {
+// key builds a tea.KeyPressMsg from a string for tests.
+func key(s string) tea.KeyPressMsg {
 	switch s {
 	case "backspace":
-		return tea.KeyMsg{Type: tea.KeyBackspace}
+		return tea.KeyPressMsg{Code: tea.KeyBackspace}
 	case "delete":
-		return tea.KeyMsg{Type: tea.KeyDelete}
+		return tea.KeyPressMsg{Code: tea.KeyDelete}
 	case "left":
-		return tea.KeyMsg{Type: tea.KeyLeft}
+		return tea.KeyPressMsg{Code: tea.KeyLeft}
 	case "right":
-		return tea.KeyMsg{Type: tea.KeyRight}
+		return tea.KeyPressMsg{Code: tea.KeyRight}
 	case "home":
-		return tea.KeyMsg{Type: tea.KeyHome}
+		return tea.KeyPressMsg{Code: tea.KeyHome}
 	case "end":
-		return tea.KeyMsg{Type: tea.KeyEnd}
+		return tea.KeyPressMsg{Code: tea.KeyEnd}
 	case "enter":
-		return tea.KeyMsg{Type: tea.KeyEnter}
+		return tea.KeyPressMsg{Code: tea.KeyEnter}
 	case "up":
-		return tea.KeyMsg{Type: tea.KeyUp}
+		return tea.KeyPressMsg{Code: tea.KeyUp}
 	case "down":
-		return tea.KeyMsg{Type: tea.KeyDown}
+		return tea.KeyPressMsg{Code: tea.KeyDown}
 	case " ":
-		return tea.KeyMsg{Type: tea.KeySpace}
+		return tea.KeyPressMsg{Code: tea.KeySpace, Text: " "}
 	case "ctrl+a":
-		return tea.KeyMsg{Type: tea.KeyCtrlA}
+		return tea.KeyPressMsg{Code: 'a', Mod: tea.ModCtrl}
 	case "ctrl+e":
-		return tea.KeyMsg{Type: tea.KeyCtrlE}
+		return tea.KeyPressMsg{Code: 'e', Mod: tea.ModCtrl}
 	case "ctrl+u":
-		return tea.KeyMsg{Type: tea.KeyCtrlU}
+		return tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}
 	default:
-		return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)}
+		// Printable character: set Code and Text so both String() matching and
+		// Text-based insertion behave like a real key press.
+		r := []rune(s)
+		return tea.KeyPressMsg{Code: r[0], Text: s}
 	}
 }
 

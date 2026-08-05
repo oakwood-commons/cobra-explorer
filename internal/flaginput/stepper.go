@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
@@ -43,7 +43,7 @@ func (s *Stepper) SetValue(v string) FlagInput {
 func (s *Stepper) Focus() FlagInput { return s }
 func (s *Stepper) Blur() FlagInput  { return s }
 
-func (s *Stepper) HandleKey(msg tea.KeyMsg) FlagInput {
+func (s *Stepper) HandleKey(msg tea.KeyPressMsg) FlagInput {
 	switch msg.String() {
 	case "up", "k", "+":
 		s.value++

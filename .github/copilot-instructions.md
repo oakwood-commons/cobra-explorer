@@ -125,10 +125,10 @@ The `design/` directory contains the initial design spec:
 
 ## Dependencies
 
-- `github.com/charmbracelet/bubbletea` — TUI framework
-- `github.com/charmbracelet/bubbles` — Reusable TUI components
-- `github.com/charmbracelet/lipgloss` — Terminal styling
+- `charm.land/bubbletea/v2` — TUI framework
+- `charm.land/bubbles/v2` — Reusable TUI components
+- `charm.land/lipgloss/v2` — Terminal styling
 - `github.com/spf13/cobra` — The CLI framework being explored (peer dependency)
 - `github.com/spf13/pflag` — Flag handling (transitive via Cobra)
 
-Keep the dependency footprint minimal. Only add new dependencies from the charmbracelet ecosystem unless there's a strong reason otherwise.
+Keep the dependency footprint minimal. Only add new dependencies from the Charm ecosystem (`charm.land/*`) unless there's a strong reason otherwise.

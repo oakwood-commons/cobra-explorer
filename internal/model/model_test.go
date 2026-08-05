@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,31 +58,32 @@ func ready(root *cobra.Command, opts model.Options) model.Model {
 	return tm.(model.Model)
 }
 
-func key(s string) tea.KeyMsg {
+func key(s string) tea.KeyPressMsg {
 	switch s {
 	case "enter":
-		return tea.KeyMsg{Type: tea.KeyEnter}
+		return tea.KeyPressMsg{Code: tea.KeyEnter}
 	case "tab":
-		return tea.KeyMsg{Type: tea.KeyTab}
+		return tea.KeyPressMsg{Code: tea.KeyTab}
 	case " ":
-		return tea.KeyMsg{Type: tea.KeySpace}
+		return tea.KeyPressMsg{Code: tea.KeySpace, Text: " "}
 	case "esc":
-		return tea.KeyMsg{Type: tea.KeyEscape}
+		return tea.KeyPressMsg{Code: tea.KeyEscape}
 	case "ctrl+c":
-		return tea.KeyMsg{Type: tea.KeyCtrlC}
+		return tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}
 	default:
-		return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)}
+		r := []rune(s)
+		return tea.KeyPressMsg{Code: r[0], Text: s}
 	}
 }
 
 func TestNew_UsesRootNameAsBinary(t *testing.T) {
 	m := ready(fixtureRoot(), model.Options{})
-	assert.Contains(t, m.View(), "mycli")
+	assert.Contains(t, m.View().Content, "mycli")
 }
 
 func TestNew_BinaryNameOverride(t *testing.T) {
 	m := ready(fixtureRoot(), model.Options{BinaryName: "custom"})
-	assert.Contains(t, m.View(), "custom")
+	assert.Contains(t, m.View().Content, "custom")
 }
 
 func TestInit_ReturnsNil(t *testing.T) {
@@ -92,13 +93,13 @@ func TestInit_ReturnsNil(t *testing.T) {
 
 func TestView_BeforeReady(t *testing.T) {
 	m := model.New(fixtureRoot(), model.Options{})
-	assert.Equal(t, "Initializing...", m.View())
+	assert.Equal(t, "Initializing...", m.View().Content)
 }
 
 func TestWindowSize_MakesReady(t *testing.T) {
 	m := ready(fixtureRoot(), model.Options{})
-	assert.NotEqual(t, "Initializing...", m.View())
-	assert.Contains(t, m.View(), "Commands")
+	assert.NotEqual(t, "Initializing...", m.View().Content)
+	assert.Contains(t, m.View().Content, "Commands")
 }
 
 func TestCtrlC_Quits(t *testing.T) {
@@ -122,12 +123,12 @@ func TestTab_CyclesZones(t *testing.T) {
 	m = tm.(model.Model)
 
 	// After selecting a command with flags, footer shows the flags-zone hint.
-	assert.Contains(t, m.View(), "Enter: edit")
+	assert.Contains(t, m.View().Content, "Enter: edit")
 
 	// Tab to the next zone (command bar) → footer hint changes.
 	tm, _ = m.Update(key("tab"))
 	m = tm.(model.Model)
-	assert.Contains(t, m.View(), "copy")
+	assert.Contains(t, m.View().Content, "copy")
 }
 
 func TestSelectRunnableWithoutFlags_FocusesCommandZone(t *testing.T) {
@@ -135,7 +136,7 @@ func TestSelectRunnableWithoutFlags_FocusesCommandZone(t *testing.T) {
 	tm, _ := m.Update(tree.CommandSelectedMsg{Node: findNode(t, fixtureRoot(), "status")})
 	m = tm.(model.Model)
 	// Command bar should show the assembled command.
-	assert.Contains(t, m.View(), "mycli status")
+	assert.Contains(t, m.View().Content, "mycli status")
 }
 
 func TestCommandZone_EnterEmitsExitCommand(t *testing.T) {
@@ -165,7 +166,7 @@ func TestCommandZone_CopyShowsFeedback(t *testing.T) {
 
 	tm, _ = m.Update(key("c"))
 	m = tm.(model.Model)
-	assert.Contains(t, m.View(), "Copied")
+	assert.Contains(t, m.View().Content, "Copied")
 }
 
 // TestCommandZone_CopyBadgeVisibleWhenOverflowed verifies that the copied
@@ -184,7 +185,7 @@ func TestCommandZone_CopyBadgeVisibleWhenOverflowed(t *testing.T) {
 	m = tm.(model.Model)
 
 	// Focus the command zone.
-	for !strings.Contains(m.View(), "c: copy") {
+	for !strings.Contains(m.View().Content, "c: copy") {
 		tm, _ = m.Update(key("tab"))
 		m = tm.(model.Model)
 	}
@@ -196,7 +197,7 @@ func TestCommandZone_CopyBadgeVisibleWhenOverflowed(t *testing.T) {
 	tm, _ = m.Update(key("c"))
 	m = tm.(model.Model)
 
-	assert.Contains(t, m.View(), "Copied", "copied badge should be visible while scrolled to start")
+	assert.Contains(t, m.View().Content, "Copied", "copied badge should be visible while scrolled to start")
 }
 
 func TestCommandZone_EnterBlockedWhenRequiredFlagMissing(t *testing.T) {
@@ -212,7 +213,7 @@ func TestCommandZone_EnterBlockedWhenRequiredFlagMissing(t *testing.T) {
 	assert.Nil(t, cmd)
 
 	// The command bar warns about the missing flag.
-	assert.Contains(t, m.View(), "missing")
+	assert.Contains(t, m.View().Content, "missing")
 }
 
 func TestFlagEdit_SetsValue(t *testing.T) {
@@ -234,7 +235,7 @@ func TestFlagEdit_SetsValue(t *testing.T) {
 	m = tm.(model.Model)
 
 	// Command bar reflects the new flag value using the flag's shorthand.
-	assert.Contains(t, m.View(), "-n prod")
+	assert.Contains(t, m.View().Content, "-n prod")
 }
 
 func TestFlagEdit_EscCancels(t *testing.T) {
@@ -252,8 +253,8 @@ func TestFlagEdit_EscCancels(t *testing.T) {
 	m = tm.(model.Model)
 
 	// name remains unset → still flagged as missing.
-	assert.Contains(t, m.View(), "missing")
-	assert.NotContains(t, m.View(), "--name temp")
+	assert.Contains(t, m.View().Content, "missing")
+	assert.NotContains(t, m.View().Content, "--name temp")
 }
 
 func TestFlagToggle_Bool(t *testing.T) {
@@ -270,7 +271,7 @@ func TestFlagToggle_Bool(t *testing.T) {
 	tm, _ = m.Update(key(" "))
 	m = tm.(model.Model)
 
-	assert.Contains(t, m.View(), "--verbose")
+	assert.Contains(t, m.View().Content, "--verbose")
 }
 
 func TestExecutionResult_ShowAndDismiss(t *testing.T) {
@@ -278,21 +279,21 @@ func TestExecutionResult_ShowAndDismiss(t *testing.T) {
 
 	tm, _ := m.Update(executor.ExecutionDoneMsg{Output: "run output here"})
 	m = tm.(model.Model)
-	view := m.View()
+	view := m.View().Content
 	assert.Contains(t, view, "run output here")
 	assert.Contains(t, view, "Output")
 
 	// Dismiss with q.
 	tm, _ = m.Update(key("q"))
 	m = tm.(model.Model)
-	assert.NotContains(t, m.View(), "run output here")
+	assert.NotContains(t, m.View().Content, "run output here")
 }
 
 func TestExecutionResult_ShowsError(t *testing.T) {
 	m := ready(fixtureRoot(), model.Options{})
 	tm, _ := m.Update(executor.ExecutionDoneMsg{Output: "", Err: assertErr{}})
 	m = tm.(model.Model)
-	view := m.View()
+	view := m.View().Content
 	assert.Contains(t, view, "failed")
 	assert.Contains(t, view, "boom")
 }
@@ -304,7 +305,7 @@ func TestExecutionEnabled_EnterRunsCommand(t *testing.T) {
 	m = tm.(model.Model)
 
 	// Footer should indicate "run" rather than paste.
-	assert.Contains(t, m.View(), "Enter: run")
+	assert.Contains(t, m.View().Content, "Enter: run")
 
 	_, cmd := m.Update(key("enter"))
 	require.NotNil(t, cmd)
@@ -318,13 +319,13 @@ func TestHighlight_UpdatesDescription(t *testing.T) {
 	m := ready(fixtureRoot(), model.Options{})
 	tm, _ := m.Update(tree.CommandHighlightedMsg{Node: findNode(t, fixtureRoot(), "deploy")})
 	m = tm.(model.Model)
-	assert.Contains(t, m.View(), "Deploy the app")
+	assert.Contains(t, m.View().Content, "Deploy the app")
 }
 
 func TestView_ContainsFooterHints(t *testing.T) {
 	m := ready(fixtureRoot(), model.Options{})
 	// Tree zone is default; footer mentions navigation and quit.
-	view := m.View()
+	view := m.View().Content
 	assert.True(t, strings.Contains(view, "navigate") || strings.Contains(view, "quit"))
 }
 
@@ -334,7 +335,7 @@ func TestFlagsZone_ShowsFlagDetail(t *testing.T) {
 	m = tm.(model.Model)
 
 	// Cursor starts on the required "name" flag; detail panel shows its metadata.
-	view := m.View()
+	view := m.View().Content
 	assert.Contains(t, view, "deployment name") // usage
 	assert.Contains(t, view, "Required: yes")
 }
@@ -357,12 +358,12 @@ func TestFlagsZone_DetailShowsDefaultAndInherited(t *testing.T) {
 
 	// Flags (alphabetical, inherited last): region(0), config(1, inherited).
 	// Cursor starts on "region" which has a default value.
-	assert.Contains(t, m.View(), "Default: us-east")
+	assert.Contains(t, m.View().Content, "Default: us-east")
 
 	// Move to inherited "config" flag.
 	tm, _ = m.Update(key("j"))
 	m = tm.(model.Model)
-	assert.Contains(t, m.View(), "Inherited: yes")
+	assert.Contains(t, m.View().Content, "Inherited: yes")
 }
 
 func TestTreeZone_NavigationForwardsToTree(t *testing.T) {
@@ -377,7 +378,7 @@ func TestTreeZone_NavigationForwardsToTree(t *testing.T) {
 	// Feeding the highlight back updates the description panel.
 	tm, _ := m.Update(hl)
 	m = tm.(model.Model)
-	assert.NotEmpty(t, m.View())
+	assert.NotEmpty(t, m.View().Content)
 }
 
 func TestDescZone_ScrollingDoesNotPanic(t *testing.T) {
@@ -405,7 +406,7 @@ func TestDescZone_ScrollingDoesNotPanic(t *testing.T) {
 		tm, _ = m.Update(key(k))
 		m = tm.(model.Model)
 	}
-	assert.NotEmpty(t, m.View())
+	assert.NotEmpty(t, m.View().Content)
 }
 
 func TestExecResult_ScrollKeys(t *testing.T) {
@@ -418,12 +419,12 @@ func TestExecResult_ScrollKeys(t *testing.T) {
 		tm, _ = m.Update(key(k))
 		m = tm.(model.Model)
 	}
-	assert.Contains(t, m.View(), "output line")
+	assert.Contains(t, m.View().Content, "output line")
 
 	// Esc dismisses.
 	tm, _ = m.Update(key("esc"))
 	m = tm.(model.Model)
-	assert.NotContains(t, m.View(), "output line")
+	assert.NotContains(t, m.View().Content, "output line")
 }
 
 // assertErr is a stub error used to exercise the failure path.

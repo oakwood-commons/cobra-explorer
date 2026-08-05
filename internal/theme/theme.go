@@ -1,6 +1,10 @@
 package theme
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"image/color"
+
+	"charm.land/lipgloss/v2"
+)
 
 // Palette defines the semantic colors of a theme. Contributors add new theme
 // presets by constructing a Palette and passing it to New — every lipgloss
@@ -14,38 +18,38 @@ type Palette struct {
 	// Background is the fill color for the whole UI and every panel interior.
 	// Leave it empty (the zero value) to make the surface transparent so the
 	// host terminal's own background shows through — see TerminalPalette.
-	Background lipgloss.Color
+	Background color.Color
 	// Foreground is the default text color used across panels.
-	Foreground lipgloss.Color
+	Foreground color.Color
 	// Muted is used for secondary/dim text (hints, placeholders).
-	Muted lipgloss.Color
+	Muted color.Color
 
 	// Border is the color of unfocused panel borders.
-	Border lipgloss.Color
+	Border color.Color
 	// BorderActive is the color of the focused panel border.
-	BorderActive lipgloss.Color
+	BorderActive color.Color
 
 	// Accent highlights titles, the tree cursor, and subheadings.
-	Accent lipgloss.Color
+	Accent color.Color
 	// AccentText is the text color drawn on top of Accent-colored backgrounds.
-	AccentText lipgloss.Color
+	AccentText color.Color
 	// Selection is the tree cursor background while the tree is unfocused.
-	Selection lipgloss.Color
+	Selection color.Color
 
 	// Runnable colors runnable commands in the tree.
-	Runnable lipgloss.Color
+	Runnable color.Color
 
 	// PreviewText and PreviewBackground style the assembled command preview.
-	PreviewText       lipgloss.Color
-	PreviewBackground lipgloss.Color
+	PreviewText       color.Color
+	PreviewBackground color.Color
 
 	// Scrollbar colors scrollbar thumbs and tracks.
-	Scrollbar lipgloss.Color
+	Scrollbar color.Color
 
 	// Semantic status colors.
-	Success lipgloss.Color
-	Warning lipgloss.Color
-	Error   lipgloss.Color
+	Success color.Color
+	Warning color.Color
+	Error   color.Color
 }
 
 // Theme defines all visual styles used by the TUI. Build one from a Palette
@@ -95,8 +99,8 @@ type Theme struct {
 }
 
 // BackgroundColor returns the palette background color, suitable for
-// lipgloss.WithWhitespaceBackground when filling layout gaps.
-func (t Theme) BackgroundColor() lipgloss.TerminalColor {
+// lipgloss.WithWhitespaceStyle when filling layout gaps.
+func (t Theme) BackgroundColor() color.Color {
 	return t.Base.GetBackground()
 }
 
@@ -108,12 +112,12 @@ func New(p Palette) Theme {
 		Foreground(p.Foreground)
 
 	// fg returns a style with the given foreground on the palette background.
-	fg := func(c lipgloss.Color) lipgloss.Style {
+	fg := func(c color.Color) lipgloss.Style {
 		return lipgloss.NewStyle().Foreground(c).Background(p.Background)
 	}
 
 	// panel returns a bordered box whose border and interior share the bg.
-	panel := func(border lipgloss.Color) lipgloss.Style {
+	panel := func(border color.Color) lipgloss.Style {
 		return lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(border).

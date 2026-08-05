@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
@@ -31,7 +31,7 @@ type FlagInput interface {
 	IsFocused() bool
 
 	// HandleKey processes a keypress while editing.
-	HandleKey(msg tea.KeyMsg) FlagInput
+	HandleKey(msg tea.KeyPressMsg) FlagInput
 
 	// Render produces the display line for this flag.
 	Render(isCursor, isEditing bool, maxWidth int) string

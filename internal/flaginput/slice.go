@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
@@ -60,7 +60,7 @@ func (s *SliceInput) Blur() FlagInput {
 	return s
 }
 
-func (s *SliceInput) HandleKey(msg tea.KeyMsg) FlagInput {
+func (s *SliceInput) HandleKey(msg tea.KeyPressMsg) FlagInput {
 	switch msg.String() {
 	case "backspace":
 		if s.cursor > 0 && len(s.buffer) > 0 {
@@ -87,10 +87,9 @@ func (s *SliceInput) HandleKey(msg tea.KeyMsg) FlagInput {
 			s.cursor++
 		}
 	default:
-		if len(msg.String()) == 1 {
-			ch := msg.String()
-			s.buffer = s.buffer[:s.cursor] + ch + s.buffer[s.cursor:]
-			s.cursor++
+		if msg.Text != "" {
+			s.buffer = s.buffer[:s.cursor] + msg.Text + s.buffer[s.cursor:]
+			s.cursor += len(msg.Text)
 		}
 	}
 	return s

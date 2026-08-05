@@ -3,7 +3,7 @@ package flaginput
 import (
 	"fmt"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
@@ -56,7 +56,7 @@ func (c *Choice) Blur() FlagInput {
 	return c
 }
 
-func (c *Choice) HandleKey(msg tea.KeyMsg) FlagInput {
+func (c *Choice) HandleKey(msg tea.KeyPressMsg) FlagInput {
 	switch msg.String() {
 	case "up", "k":
 		if c.selected > 0 {

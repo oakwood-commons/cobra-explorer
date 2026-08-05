@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/spf13/cobra"
 
@@ -99,7 +99,7 @@ func New(root *cobra.Command, opts Options) Model {
 		root:             root,
 		treeRoot:         treeRoot,
 		treeM:            tree.NewModel(treeRoot, th),
-		descVP:           viewport.New(80, 10),
+		descVP:           viewport.New(viewport.WithWidth(80), viewport.WithHeight(10)),
 		clip:             clipboard.New(),
 		theme:            th,
 		binaryName:       binaryName,
@@ -123,13 +123,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 		m.reflow()
 		if m.showExecResult {
-			m.execVP.Width = m.width
-			m.execVP.Height = m.height - 4
+			m.execVP.SetWidth(m.width)
+			m.execVP.SetHeight(m.height - 4)
 		}
 		m.ready = true
 		return m, nil
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		// Execution result screen: scroll or dismiss.
 		if m.showExecResult {
 			switch msg.String() {
@@ -138,13 +138,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.lastExecOutput = ""
 				m.lastExecErr = nil
 			case "j", "down":
-				m.execVP.LineDown(1)
+				m.execVP.ScrollDown(1)
 			case "k", "up":
-				m.execVP.LineUp(1)
+				m.execVP.ScrollUp(1)
 			case "d":
-				m.execVP.HalfViewDown()
+				m.execVP.HalfPageDown()
 			case "u":
-				m.execVP.HalfViewUp()
+				m.execVP.HalfPageUp()
 			case "g":
 				m.execVP.GotoTop()
 			case "G":
@@ -204,7 +204,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Set up the execution result viewport. Full width so the themed
 		// background covers the entire row; height leaves room for the header,
 		// two blank spacer rows, and the footer.
-		m.execVP = viewport.New(m.width, m.height-4)
+		m.execVP = viewport.New(viewport.WithWidth(m.width), viewport.WithHeight(m.height-4))
 		m.execVP.Style = m.theme.Body
 		content := msg.Output
 		if msg.Err != nil {
@@ -224,27 +224,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // --- Key handlers ---
 
-func (m Model) handleTree(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m Model) handleTree(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.treeM, cmd = m.treeM.Update(tea.Msg(msg))
 	return m, cmd
 }
 
-func (m Model) handleDesc(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m Model) handleDesc(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "j", "down":
-		m.descVP.LineDown(1)
+		m.descVP.ScrollDown(1)
 	case "k", "up":
-		m.descVP.LineUp(1)
+		m.descVP.ScrollUp(1)
 	case "d":
-		m.descVP.HalfViewDown()
+		m.descVP.HalfPageDown()
 	case "u":
-		m.descVP.HalfViewUp()
+		m.descVP.HalfPageUp()
 	}
 	return m, nil
 }
 
-func (m Model) handleFlags(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m Model) handleFlags(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	if len(m.flagInputs) == 0 {
 		return m, nil
 	}
@@ -267,7 +267,7 @@ func (m Model) handleFlags(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.editing = true
 			m.flagInputs[m.flagCursor] = fi.Focus()
 		}
-	case " ":
+	case "space":
 		if m.flagInputs[m.flagCursor].Flag().Type == "bool" {
 			m.toggleBool(m.flagCursor)
 		}
@@ -275,7 +275,7 @@ func (m Model) handleFlags(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) handleFlagEdit(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m Model) handleFlagEdit(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "enter", "tab":
 		fi := m.flagInputs[m.flagCursor].Blur()
@@ -297,7 +297,7 @@ func (m Model) handleFlagEdit(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) handleCmd(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m Model) handleCmd(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "enter":
 		if m.built != nil && m.built.IsValid() {
@@ -406,7 +406,7 @@ func (m *Model) reflow() {
 	}
 
 	// 2. Set viewport width + content so line wrapping is accurate.
-	m.descVP.Width = vpW
+	m.descVP.SetWidth(vpW)
 	m.descVP.SetContent(m.descContent)
 
 	// 3. Compute layout with actual wrapped line count.
@@ -424,7 +424,7 @@ func (m *Model) reflow() {
 	}
 	m.treeM = m.treeM.SetSize(treeContentW, layout.ContentRows(m.ly.TreeInnerH))
 	// Viewport height = desc content rows (innerH - 1 title row).
-	m.descVP.Height = layout.ContentRows(m.ly.DescInnerH)
+	m.descVP.SetHeight(layout.ContentRows(m.ly.DescInnerH))
 	m.descVP.GotoTop()
 }
 
@@ -432,7 +432,7 @@ func (m *Model) reflow() {
 
 func (m *Model) recomputeZones() {
 	m.zones = []int{ZoneTree}
-	if m.descVP.TotalLineCount() > m.descVP.Height {
+	if m.descVP.TotalLineCount() > m.descVP.Height() {
 		m.zones = append(m.zones, ZoneDesc)
 	}
 	if len(m.flagInputs) > 0 {
@@ -528,14 +528,23 @@ func (m Model) buildDescription(node *tree.CommandNode) string {
 
 // --- View ---
 
-func (m Model) View() string {
+// newAltView wraps a rendered frame in a tea.View that requests the alternate
+// screen buffer (full-window mode). In bubbletea v2, AltScreen is set on the
+// View returned from View() rather than via a tea.NewProgram option.
+func newAltView(content string) tea.View {
+	v := tea.NewView(content)
+	v.AltScreen = true
+	return v
+}
+
+func (m Model) View() tea.View {
 	if !m.ready {
-		return "Initializing..."
+		return newAltView("Initializing...")
 	}
 
 	// Full-screen execution result view.
 	if m.showExecResult {
-		return m.execResultView()
+		return newAltView(m.execResultView())
 	}
 
 	header := m.headerBar()
@@ -558,7 +567,7 @@ func (m Model) View() string {
 	footer := m.theme.Dim.Width(m.width).Render("  " + m.footerHints())
 
 	view := lipgloss.JoinVertical(lipgloss.Left, header, body, cmdBar, footer)
-	return m.theme.Base.Width(m.width).Height(m.height).Render(view)
+	return newAltView(m.theme.Base.Width(m.width).Height(m.height).Render(view))
 }
 
 // headerBar renders the title pill filled to the full terminal width so the
@@ -566,7 +575,7 @@ func (m Model) View() string {
 func (m Model) headerBar() string {
 	pill := m.theme.Title.Render(" " + m.binaryName + " explore ")
 	return lipgloss.PlaceHorizontal(m.width, lipgloss.Left, pill,
-		lipgloss.WithWhitespaceBackground(m.theme.BackgroundColor()))
+		lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Background(m.theme.BackgroundColor())))
 }
 
 func (m Model) execResultView() string {
@@ -577,17 +586,17 @@ func (m Model) execResultView() string {
 	}
 	header := lipgloss.PlaceHorizontal(m.width, lipgloss.Left,
 		m.theme.Title.Render(" Output ")+"  "+status,
-		lipgloss.WithWhitespaceBackground(m.theme.BackgroundColor()))
+		lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Background(m.theme.BackgroundColor())))
 
 	// Scrollable output viewport.
 	content := m.execVP.View()
 
 	// Scroll indicator.
 	scrollInfo := ""
-	if m.execVP.TotalLineCount() > m.execVP.Height {
+	if m.execVP.TotalLineCount() > m.execVP.Height() {
 		pct := 0
-		if m.execVP.TotalLineCount()-m.execVP.Height > 0 {
-			pct = m.execVP.YOffset * 100 / (m.execVP.TotalLineCount() - m.execVP.Height)
+		if m.execVP.TotalLineCount()-m.execVP.Height() > 0 {
+			pct = m.execVP.YOffset() * 100 / (m.execVP.TotalLineCount() - m.execVP.Height())
 		}
 		scrollInfo = m.theme.Dim.Render(fmt.Sprintf("  %d%%", pct))
 	}
@@ -602,7 +611,7 @@ func (m Model) execResultView() string {
 // lipgloss.Place pads but does NOT truncate, so we truncate to exactly h lines.
 func (m Model) borderedPanel(focused bool, w, h int, content string) string {
 	placed := lipgloss.Place(w, h, lipgloss.Left, lipgloss.Top, content,
-		lipgloss.WithWhitespaceBackground(m.theme.BackgroundColor()))
+		lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Background(m.theme.BackgroundColor())))
 
 	// Truncate to exactly h lines (Place doesn't clip overflow).
 	lines := strings.Split(placed, "\n")
@@ -690,8 +699,8 @@ func (m Model) descBody() string {
 		return m.theme.Body.Render(flagContent)
 	}
 	content := m.descVP.View()
-	if m.descVP.TotalLineCount() > m.descVP.Height {
-		bar := scrollbar.Render(m.descVP.Height, m.descVP.TotalLineCount(), m.descVP.YOffset,
+	if m.descVP.TotalLineCount() > m.descVP.Height() {
+		bar := scrollbar.Render(m.descVP.Height(), m.descVP.TotalLineCount(), m.descVP.YOffset(),
 			m.theme.Scrollbar)
 		content = lipgloss.JoinHorizontal(lipgloss.Top, content, bar)
 	}

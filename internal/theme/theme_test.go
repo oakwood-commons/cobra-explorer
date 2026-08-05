@@ -3,8 +3,7 @@ package theme_test
 import (
 	"testing"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
+	"charm.land/lipgloss/v2"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/theme"
@@ -91,9 +90,6 @@ func TestBackgroundColor_MatchesBase(t *testing.T) {
 }
 
 func TestTerminalThemes_HaveTransparentSurface(t *testing.T) {
-	// Force a color profile so styles emit ANSI sequences we can inspect.
-	lipgloss.SetColorProfile(termenv.ANSI256)
-
 	for _, name := range []string{"terminal", "terminal-light"} {
 		t.Run(name, func(t *testing.T) {
 			th, ok := theme.Get(name)
