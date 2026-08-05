@@ -3,7 +3,7 @@ package flaginput
 import (
 	"fmt"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
@@ -48,7 +48,7 @@ func (t *TextInput) Blur() FlagInput {
 	return t
 }
 
-func (t *TextInput) HandleKey(msg tea.KeyMsg) FlagInput {
+func (t *TextInput) HandleKey(msg tea.KeyPressMsg) FlagInput {
 	switch msg.String() {
 	case "backspace":
 		if t.cursor > 0 && len(t.buffer) > 0 {
@@ -75,11 +75,11 @@ func (t *TextInput) HandleKey(msg tea.KeyMsg) FlagInput {
 		t.buffer = ""
 		t.cursor = 0
 	default:
-		// Insert printable character
-		if len(msg.String()) == 1 {
-			ch := msg.String()
-			t.buffer = t.buffer[:t.cursor] + ch + t.buffer[t.cursor:]
-			t.cursor++
+		// Insert printable text (msg.Text is non-empty only for text-producing
+		// keys, e.g. " ", "a", or a pasted grapheme).
+		if msg.Text != "" {
+			t.buffer = t.buffer[:t.cursor] + msg.Text + t.buffer[t.cursor:]
+			t.cursor += len(msg.Text)
 		}
 	}
 	return t

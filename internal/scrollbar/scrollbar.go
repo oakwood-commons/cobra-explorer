@@ -3,7 +3,7 @@ package scrollbar
 import (
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
 // Render produces a vertical scrollbar string of the given height.

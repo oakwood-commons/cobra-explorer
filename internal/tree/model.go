@@ -3,8 +3,8 @@ package tree
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/theme"
 )
@@ -72,7 +72,7 @@ func (m Model) Height() int {
 
 // Update handles key events when the tree is focused.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	keyMsg, ok := msg.(tea.KeyMsg)
+	keyMsg, ok := msg.(tea.KeyPressMsg)
 	if !ok {
 		return m, nil
 	}

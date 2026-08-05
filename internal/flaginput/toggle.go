@@ -3,7 +3,7 @@ package flaginput
 import (
 	"fmt"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
 )
@@ -40,8 +40,8 @@ func (t *Toggle) SetValue(v string) FlagInput {
 func (t *Toggle) Focus() FlagInput { return t }
 func (t *Toggle) Blur() FlagInput  { return t }
 
-func (t *Toggle) HandleKey(msg tea.KeyMsg) FlagInput {
-	if msg.String() == " " || msg.String() == "enter" {
+func (t *Toggle) HandleKey(msg tea.KeyPressMsg) FlagInput {
+	if msg.String() == "space" || msg.String() == "enter" {
 		t.value = !t.value
 	}
 	return t

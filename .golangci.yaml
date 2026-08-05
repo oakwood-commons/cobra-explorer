@@ -14,7 +14,7 @@ linters:
     - exhaustive
     - gochecknoinits
     - goheader
-    - gomodguard_v2
+    - gomodguard
     - goprintffuncname
     - importas
     - makezero

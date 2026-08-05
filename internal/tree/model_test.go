@@ -3,7 +3,7 @@ package tree_test
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,8 +24,9 @@ func navRoot() *tree.CommandNode {
 	return tree.BuildTree(root, tree.BuildOptions{})
 }
 
-func keyMsg(s string) tea.KeyMsg {
-	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)}
+func keyMsg(s string) tea.KeyPressMsg {
+	r := []rune(s)
+	return tea.KeyPressMsg{Code: r[0], Text: s}
 }
 
 func TestModel_InitialState(t *testing.T) {
@@ -77,10 +78,10 @@ func TestModel_ExpandCollapse(t *testing.T) {
 
 func TestModel_HomeEnd(t *testing.T) {
 	m := tree.NewModel(navRoot(), theme.Default())
-	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnd})
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyEnd})
 	assert.Equal(t, "b", m.Cursor().Name)
 
-	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyHome})
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyHome})
 	assert.Equal(t, "root", m.Cursor().Name)
 	assert.Equal(t, 0, m.ScrollOffset())
 }
@@ -88,10 +89,10 @@ func TestModel_HomeEnd(t *testing.T) {
 func TestModel_EnterOnRunnableEmitsSelected(t *testing.T) {
 	m := tree.NewModel(navRoot(), theme.Default())
 	// Navigate to 'b' (runnable).
-	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnd})
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyEnd})
 	require.Equal(t, "b", m.Cursor().Name)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	_, cmd := m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
 	require.NotNil(t, cmd)
 	msg := cmd()
 	selected, ok := msg.(tree.CommandSelectedMsg)
@@ -104,7 +105,7 @@ func TestModel_EnterOnGroupExpands(t *testing.T) {
 	m, _ = m.Update(keyMsg("j")) // 'a', a non-runnable group
 	require.Equal(t, "a", m.Cursor().Name)
 
-	m, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m, cmd := m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
 	// Should expand and descend rather than emit CommandSelectedMsg.
 	require.NotNil(t, cmd)
 	msg := cmd()
@@ -170,7 +171,7 @@ func TestModel_ScrollWithSmallViewport(t *testing.T) {
 	m = m.SetSize(40, 2) // only 2 rows visible
 
 	// Move to end; scroll should follow the cursor.
-	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnd})
+	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyEnd})
 	assert.Equal(t, "b", m.Cursor().Name)
 	assert.Greater(t, m.ScrollOffset(), 0)
 }
