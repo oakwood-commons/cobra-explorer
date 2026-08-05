@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- In-process execution now captures output written directly to `os.Stdout` and
+  `os.Stderr` by command handlers (e.g. `fmt.Println`), not just output routed
+  through Cobra's writer. On Unix, file-descriptor-level redirection also
+  captures commands that cache `os.Stdout` before running — most notably
+  Cobra's generated `completion` command — which previously produced no output.
+- Execution result view now spans the full panel width so the themed background
+  covers the entire row.
+
 ## [0.1.0] - 2026-07-15
 
 ### Added

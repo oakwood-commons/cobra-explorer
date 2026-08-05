@@ -1,5 +1,16 @@
 # Copilot Instructions for cobra-explorer
 
+## Git and Release Policy (read first)
+
+**The agent must never write to git history or publish releases. Committing, tagging, and releasing are human-only actions, always performed manually by a person.**
+
+- NEVER run `git commit` (including `git commit --amend`), `git merge`, `git rebase`, `git reset`, `git revert`, `git cherry-pick`, or any command that creates or rewrites commits.
+- NEVER run `git push` or otherwise publish changes to a remote.
+- NEVER create, move, or delete git tags (`git tag`), and never cut, draft, or publish a release.
+- Allowed git actions are limited to read-only inspection (`git status`, `git diff`, `git log`, `git show`) and staging (`git add`).
+- When work is ready to be committed, tagged, or released, STOP and hand the user a ready-to-run command (with DCO sign-off `-s` where applicable) for them to run themselves.
+- This applies to every workflow. The release flow in `.github/prompts/prepare-release.prompt.md` follows the same rule.
+
 ## Project Overview
 
 cobra-explorer is a Go library that provides an interactive TUI (Terminal User Interface) for any Cobra-based CLI application. It allows users to visually browse command trees, inspect flags, build commands interactively, and execute them.

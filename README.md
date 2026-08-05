@@ -1,8 +1,7 @@
 # cobra-explorer
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/oakwood-commons/cobra-explorer.svg)](https://pkg.go.dev/github.com/oakwood-commons/cobra-explorer)
+[![Go Reference](https://pkg.go.dev/badge/github.com/oakwood-commons/cobra-explorer/explore.svg)](https://pkg.go.dev/github.com/oakwood-commons/cobra-explorer/explore)
 [![CI](https://github.com/oakwood-commons/cobra-explorer/actions/workflows/test.yml/badge.svg)](https://github.com/oakwood-commons/cobra-explorer/actions/workflows/test.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/oakwood-commons/cobra-explorer)](https://goreportcard.com/report/github.com/oakwood-commons/cobra-explorer)
 
 An interactive TUI for any [Cobra](https://github.com/spf13/cobra)-based CLI application. Browse the full command tree, inspect flags and documentation, build commands visually, and execute them — all without memorizing help output.
 
