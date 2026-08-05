@@ -8,6 +8,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/spf13/cobra"
+
 	"github.com/oakwood-commons/cobra-explorer/internal/builder"
 	"github.com/oakwood-commons/cobra-explorer/internal/clipboard"
 	"github.com/oakwood-commons/cobra-explorer/internal/executor"
@@ -16,7 +18,6 @@ import (
 	"github.com/oakwood-commons/cobra-explorer/internal/scrollbar"
 	"github.com/oakwood-commons/cobra-explorer/internal/theme"
 	"github.com/oakwood-commons/cobra-explorer/internal/tree"
-	"github.com/spf13/cobra"
 )
 
 // Focus zones.
@@ -122,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 		m.reflow()
 		if m.showExecResult {
-			m.execVP.Width = m.width - 4
+			m.execVP.Width = m.width
 			m.execVP.Height = m.height - 4
 		}
 		m.ready = true
@@ -200,8 +201,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.lastExecErr = msg.Err
 		m.lastExecOutput = msg.Output
 		m.showExecResult = true
-		// Set up the execution result viewport.
-		m.execVP = viewport.New(m.width-4, m.height-4)
+		// Set up the execution result viewport. Full width so the themed
+		// background covers the entire row; height leaves room for the header,
+		// two blank spacer rows, and the footer.
+		m.execVP = viewport.New(m.width, m.height-4)
 		m.execVP.Style = m.theme.Body
 		content := msg.Output
 		if msg.Err != nil {
