@@ -1,6 +1,6 @@
 module github.com/oakwood-commons/cobra-explorer
 
-go 1.25.0
+go 1.26.6
 
 require (
 	charm.land/bubbles/v2 v2.2.1
