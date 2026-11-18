@@ -76,7 +76,6 @@ go test -race ./...
 | Tree model | Navigation state, expand/collapse, cursor position |
 | Flag inputs | Value changes from keystrokes, validation |
 | Builder | Command string serialization |
-| Executor | Args construction, output capture |
 | Layout | Panel dimensions at various terminal sizes |
 
 ## What NOT to Test

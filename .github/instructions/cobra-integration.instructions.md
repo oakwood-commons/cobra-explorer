@@ -38,16 +38,6 @@ cmd.Runnable() // has Run or RunE
 f.Annotations[cobra.BashCompOneRequiredFlag]
 ```
 
-## In-Process Execution
-
-When executing a built command (`internal/executor/`):
-
-1. Construct args from `BuiltCommand`
-2. Set `root.SetArgs(args)`
-3. Capture stdout/stderr with `root.SetOut()` / `root.SetErr()`
-4. Call `root.Execute()`
-5. Reset output writers after execution
-
 ## Adding New Cobra Data to the Tree
 
 If you need to expose additional Cobra metadata:

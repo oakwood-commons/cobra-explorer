@@ -15,7 +15,7 @@ func main() {
 	// The theme defaults to "dark". End users can override it at runtime with
 	// the explore command's --theme flag (e.g. `demo explore --theme dracula`)
 	// or list the available themes with `demo explore --list-themes`.
-	root.AddCommand(explore.NewCommand(root, explore.WithExecution(true)))
+	root.AddCommand(explore.NewCommand(root))
 
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

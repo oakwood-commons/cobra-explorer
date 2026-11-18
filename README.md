@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/oakwood-commons/cobra-explorer/explore.svg)](https://pkg.go.dev/github.com/oakwood-commons/cobra-explorer/explore)
 [![CI](https://github.com/oakwood-commons/cobra-explorer/actions/workflows/test.yml/badge.svg)](https://github.com/oakwood-commons/cobra-explorer/actions/workflows/test.yml)
 
-An interactive TUI for any [Cobra](https://github.com/spf13/cobra)-based CLI application. Browse the full command tree, inspect flags and documentation, build commands visually, and execute them — all without memorizing help output.
+An interactive TUI for any [Cobra](https://github.com/spf13/cobra)-based CLI application. Browse the full command tree, inspect flags and documentation, and build commands visually — all without memorizing help output.
 
 <p align="center">
   <img src="doc/demo.gif" alt="cobra-explorer demo" width="700">
@@ -14,7 +14,6 @@ An interactive TUI for any [Cobra](https://github.com/spf13/cobra)-based CLI app
 - **Command tree navigation** — Browse all commands and subcommands in an interactive tree
 - **Flag discovery** — See all flags with types, defaults, and descriptions
 - **Command builder** — Assemble commands visually with type-aware flag inputs (using each flag's shorthand form when available)
-- **In-process execution** — Run built commands directly from the TUI
 - **Clipboard copy** — Copy the assembled command string to your clipboard
 - **Zero-config integration** — Add to any Cobra CLI with a single line of code
 
@@ -95,7 +94,7 @@ If you use [Task](https://taskfile.dev), the same demo is available as a one-lin
 task example   # runs: go run ./examples/basic/ explore
 ```
 
-Inside the TUI, use the [key bindings](#key-bindings) below to browse the command tree, edit flags, and build or execute a command.
+Inside the TUI, use the [key bindings](#key-bindings) below to browse the command tree, edit flags, and build a command.
 
 ## Configuration
 
@@ -105,7 +104,6 @@ Use functional options to customize behavior:
 explore.NewCommand(rootCmd,
     explore.WithBinaryName("mycli"),       // override display name
     explore.WithShowHidden(true),          // show hidden commands
-    explore.WithExecution(true),           // enable in-TUI execution
     explore.WithThemeName("dracula"),      // select a theme preset by name
     explore.WithLightTheme(),              // shorthand for WithThemeName("light")
 )
@@ -119,7 +117,6 @@ explore.NewCommand(rootCmd,
 | `WithThemeName(name)` | Select a theme preset by name (unknown names fall back to the default) | `"dark"` |
 | `WithLightTheme()` | Use the built-in light theme (shorthand for `WithThemeName("light")`) | — |
 | `WithShowHidden(bool)` | Show hidden commands in the tree | `false` |
-| `WithExecution(bool)` | Enable in-process command execution | `false` |
 
 ### Themes
 
@@ -180,8 +177,8 @@ only the focused zone responds to arrow keys and `Enter`.
 | Key | Context | Action |
 |-----|---------|--------|
 | `Tab` / `Shift+Tab` | Global | Cycle focus forward / backward between zones |
-| `Ctrl+C` | Global | Quit without emitting a command |
-| `q` | Global | Quit (ignored while editing a flag in the flags zone) |
+| `Ctrl+C` | Global | Quit without emitting a command (also while editing a flag) |
+| `q` | Global | Quit (typed into the field instead while editing a flag) |
 | `↑`/`k`, `↓`/`j` | Tree | Move between commands |
 | `→`/`l` | Tree | Expand and descend into subcommands |
 | `←`/`h` | Tree | Collapse, or go to parent if already collapsed |
@@ -193,7 +190,7 @@ only the focused zone responds to arrow keys and `Enter`.
 | `Enter` | Flag | Toggle a bool, or start editing a value flag |
 | `Enter` / `Tab` | Flag (editing) | Commit the value |
 | `Esc` | Flag (editing) | Cancel and restore the previous value |
-| `Enter` | Command Bar | Paste the command to the shell (or run it with `WithExecution`) |
+| `Enter` | Command Bar | Paste the command to the shell |
 | `c` | Command Bar | Copy the command string to the clipboard |
 | `←`/`h`, `→`/`l` | Command Bar | Scroll a long command horizontally |
 | `Home`/`0`, `End`/`$` | Command Bar | Jump to the start / end of the command |
@@ -207,8 +204,8 @@ graph TD
     C --> D[Tree Navigator Panel]
     C --> E[Detail Panel]
     C --> F[Command Builder Panel]
-    F -->|Enter| G[In-Process Executor]
-    F -->|Ctrl+C| H[Clipboard Copy]
+    F -->|Enter| G[Shell Command Line]
+    F -->|c| H[Clipboard Copy]
 ```
 
 The library introspects your Cobra command tree at startup (read-only, never mutates) and presents it through a [Bubble Tea](https://github.com/charmbracelet/bubbletea) TUI with multiple interactive panels.

@@ -76,7 +76,7 @@ feat: add fuzzy search to tree navigator
 fix: correct flag value parsing for duration type
 docs: update README with new options
 refactor: extract layout calculation into helper
-test: add integration tests for executor
+test: add integration tests for the command builder
 ```
 
 ## Code Guidelines
@@ -114,7 +114,6 @@ cobra-explorer/
 │   ├── tree/           # Command tree data structure + navigation
 │   ├── builder/        # Command builder (BuiltCommand)
 │   ├── flaginput/      # Type-aware flag input widgets
-│   ├── executor/       # In-process command execution
 │   ├── clipboard/      # OS-specific clipboard support
 │   ├── theme/          # Visual themes and styles
 │   ├── layout/         # Panel sizing and responsive layout

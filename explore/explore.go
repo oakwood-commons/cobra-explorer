@@ -30,11 +30,10 @@ func Run(root *cobra.Command, opts ...Option) error {
 	}
 
 	m := model.New(root, model.Options{
-		BinaryName:       cfg.binaryName,
-		Theme:            th,
-		ThemeSet:         themeSet,
-		ShowHidden:       cfg.showHidden,
-		ExecutionEnabled: cfg.executionEnabled,
+		BinaryName: cfg.binaryName,
+		Theme:      th,
+		ThemeSet:   themeSet,
+		ShowHidden: cfg.showHidden,
 	})
 
 	// AltScreen is requested declaratively by the model's View(); NewProgram no

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The flags panel no longer swallows global shortcuts: `q` (and every other
+  shortcut) now works while the flags panel is focused. Keys are captured by a
+  field only after `Enter` starts editing it, and while editing only `Enter` /
+  `Tab` (commit), `Esc` (cancel) and `Ctrl+C` (quit) are handled.
+
+### Removed
+
+- **Breaking:** in-TUI command execution. The `WithExecution` option and the
+  internal `executor` package are gone, along with the full-screen output view.
+  `Enter` in the command bar now always hands the built command back to the
+  shell. Remove `explore.WithExecution(...)` from your `explore.NewCommand` /
+  `explore.Run` calls.
+
+### Fixed
+
+- A flag with a long usage string no longer overflows the details panel and
+  breaks the layout while the flags panel is focused; the text now wraps to the
+  panel width.
+- The details panel wraps long description text on word boundaries again instead
+  of cutting it off at the panel edge, so the end of a long sentence is no
+  longer lost (a regression from the Bubble Tea v2 migration).
+
 ## [0.2.0] - 2026-08-05
 
 ### Changed

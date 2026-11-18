@@ -13,7 +13,7 @@
 
 ## Project Overview
 
-cobra-explorer is a Go library that provides an interactive TUI (Terminal User Interface) for any Cobra-based CLI application. It allows users to visually browse command trees, inspect flags, build commands interactively, and execute them.
+cobra-explorer is a Go library that provides an interactive TUI (Terminal User Interface) for any Cobra-based CLI application. It allows users to visually browse command trees, inspect flags, and build commands interactively.
 
 ## Architecture
 
@@ -22,7 +22,7 @@ cobra-explorer is a Go library that provides an interactive TUI (Terminal User I
 The public API surface is intentionally minimal and lives in `explore/`:
 
 - `explore/explore.go` — `Run()` and `NewCommand()` entry points
-- `explore/options.go` — Functional options (`WithBinaryName`, `WithThemeName`, `WithShowHidden`, `WithExecution`, `WithLightTheme`)
+- `explore/options.go` — Functional options (`WithBinaryName`, `WithThemeName`, `WithShowHidden`, `WithLightTheme`)
 - `explore/doc.go` — Package-level documentation
 
 Import path: `github.com/oakwood-commons/cobra-explorer/explore`
@@ -39,7 +39,6 @@ All implementation lives under `internal/` to prevent consumers from depending o
 | `internal/tree` | Command tree data structure, Cobra introspection, navigation |
 | `internal/builder` | BuiltCommand type, command string serialization |
 | `internal/flaginput` | Type-aware flag input widgets (text, toggle, choice, slice, stepper) |
-| `internal/executor` | In-process Cobra command execution |
 | `internal/clipboard` | OS-specific clipboard support (build tags) |
 | `internal/theme` | Theme struct and built-in themes (dark/light) |
 | `internal/layout` | Panel sizing and responsive layout calculations |
@@ -97,7 +96,7 @@ The `design/` directory contains the initial design spec:
 
 ### Documentation Sync
 
-- Whenever a change alters how the application is interacted with or how it behaves (key bindings, flag input behavior, panel navigation, options, execution flow, visible output, etc.), check the change against `README.md`.
+- Whenever a change alters how the application is interacted with or how it behaves (key bindings, flag input behavior, panel navigation, options, visible output, etc.), check the change against `README.md`.
 - If the observable behavior described in `README.md` no longer matches, update `README.md` in the same change so the docs stay accurate.
 - This applies to behavior changes even when not explicitly asked to update docs — treat the doc update as part of completing the behavior change.
 

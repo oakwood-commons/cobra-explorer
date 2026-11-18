@@ -28,7 +28,6 @@ func TestNewCommand_WithOptions(t *testing.T) {
 		explore.WithBinaryName("custom"),
 		explore.WithLightTheme(),
 		explore.WithShowHidden(true),
-		explore.WithExecution(true),
 	)
 	require.NotNil(t, cmd)
 	assert.Equal(t, "explore", cmd.Use)
@@ -41,7 +40,6 @@ func TestOptions_AreFunctional(t *testing.T) {
 		explore.WithThemeName("dracula"),
 		explore.WithLightTheme(),
 		explore.WithShowHidden(true),
-		explore.WithExecution(true),
 	}
 	for i, o := range opts {
 		assert.NotNil(t, o, "option %d should not be nil", i)

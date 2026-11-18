@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"strings"
 
 	"charm.land/bubbles/v2/viewport"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/oakwood-commons/cobra-explorer/internal/builder"
 	"github.com/oakwood-commons/cobra-explorer/internal/clipboard"
-	"github.com/oakwood-commons/cobra-explorer/internal/executor"
 	"github.com/oakwood-commons/cobra-explorer/internal/flaginput"
 	"github.com/oakwood-commons/cobra-explorer/internal/layout"
 	"github.com/oakwood-commons/cobra-explorer/internal/scrollbar"
@@ -35,7 +33,6 @@ type ExitCommandMsg struct {
 
 // Model is the top-level Bubble Tea model.
 type Model struct {
-	root     *cobra.Command
 	treeRoot *tree.CommandNode
 	treeM    tree.Model
 	descVP   viewport.Model
@@ -57,27 +54,21 @@ type Model struct {
 	zones []int
 
 	// Status.
-	binaryName       string
-	showHidden       bool
-	executionEnabled bool
-	copied           bool
-	exitCommand      string
-	lastExecOutput   string
-	lastExecErr      error
-	showExecResult   bool
-	execVP           viewport.Model
-	width            int
-	height           int
-	ready            bool
+	binaryName  string
+	showHidden  bool
+	copied      bool
+	exitCommand string
+	width       int
+	height      int
+	ready       bool
 }
 
 // Options configures the model.
 type Options struct {
-	BinaryName       string
-	Theme            theme.Theme
-	ThemeSet         bool
-	ShowHidden       bool
-	ExecutionEnabled bool
+	BinaryName string
+	Theme      theme.Theme
+	ThemeSet   bool
+	ShowHidden bool
 }
 
 // New creates a new Model.
@@ -96,17 +87,15 @@ func New(root *cobra.Command, opts Options) Model {
 	}
 
 	m := Model{
-		root:             root,
-		treeRoot:         treeRoot,
-		treeM:            tree.NewModel(treeRoot, th),
-		descVP:           viewport.New(viewport.WithWidth(80), viewport.WithHeight(10)),
-		clip:             clipboard.New(),
-		theme:            th,
-		binaryName:       binaryName,
-		showHidden:       opts.ShowHidden,
-		executionEnabled: opts.ExecutionEnabled,
-		zone:             ZoneTree,
-		zones:            []int{ZoneTree, ZoneCommand},
+		treeRoot:   treeRoot,
+		treeM:      tree.NewModel(treeRoot, th),
+		descVP:     viewport.New(viewport.WithWidth(80), viewport.WithHeight(10)),
+		clip:       clipboard.New(),
+		theme:      th,
+		binaryName: binaryName,
+		showHidden: opts.ShowHidden,
+		zone:       ZoneTree,
+		zones:      []int{ZoneTree, ZoneCommand},
 	}
 	m.descVP.Style = m.theme.Body
 	m.selectNode(treeRoot)
@@ -122,46 +111,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m.reflow()
-		if m.showExecResult {
-			m.execVP.SetWidth(m.width)
-			m.execVP.SetHeight(m.height - 4)
-		}
 		m.ready = true
 		return m, nil
 
 	case tea.KeyPressMsg:
-		// Execution result screen: scroll or dismiss.
-		if m.showExecResult {
-			switch msg.String() {
-			case "q", "esc", "enter":
-				m.showExecResult = false
-				m.lastExecOutput = ""
-				m.lastExecErr = nil
-			case "j", "down":
-				m.execVP.ScrollDown(1)
-			case "k", "up":
-				m.execVP.ScrollUp(1)
-			case "d":
-				m.execVP.HalfPageDown()
-			case "u":
-				m.execVP.HalfPageUp()
-			case "g":
-				m.execVP.GotoTop()
-			case "G":
-				m.execVP.GotoBottom()
-			}
-			return m, nil
+		if msg.String() == "ctrl+c" {
+			return m, tea.Quit
 		}
+		// While a flag is being edited, every other key belongs to the field
+		// (Enter/Tab commit, Esc cancels), so global shortcuts like "q" are
+		// typed instead of triggering.
 		if m.editing {
 			return m.handleFlagEdit(msg)
 		}
 		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
 		case "q":
-			if m.zone != ZoneFlags {
-				return m, tea.Quit
-			}
+			return m, tea.Quit
 		case "tab":
 			m.cycleZone(1)
 			return m, nil
@@ -196,28 +161,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ExitCommandMsg:
 		m.exitCommand = msg.Command
 		return m, tea.Quit
-
-	case executor.ExecutionDoneMsg:
-		m.lastExecErr = msg.Err
-		m.lastExecOutput = msg.Output
-		m.showExecResult = true
-		// Set up the execution result viewport. Full width so the themed
-		// background covers the entire row; height leaves room for the header,
-		// two blank spacer rows, and the footer.
-		m.execVP = viewport.New(viewport.WithWidth(m.width), viewport.WithHeight(m.height-4))
-		m.execVP.Style = m.theme.Body
-		content := msg.Output
-		if msg.Err != nil {
-			if content != "" {
-				content += "\n"
-			}
-			content += "Error: " + msg.Err.Error()
-		}
-		if content == "" {
-			content = "(no output)"
-		}
-		m.execVP.SetContent(content)
-		return m, nil
 	}
 	return m, nil
 }
@@ -301,9 +244,6 @@ func (m Model) handleCmd(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "enter":
 		if m.built != nil && m.built.IsValid() {
-			if m.executionEnabled {
-				return m, executor.NewInlineExecCommand(m.root, m.built.ToArgs())
-			}
 			return m, func() tea.Msg { return ExitCommandMsg{Command: m.built.String()} }
 		}
 	case "c":
@@ -405,9 +345,11 @@ func (m *Model) reflow() {
 		vpW = 1
 	}
 
-	// 2. Set viewport width + content so line wrapping is accurate.
+	// 2. Set viewport width + content so line wrapping is accurate. The
+	// viewport cuts overlong lines off instead of wrapping them (and counts
+	// unwrapped lines), so wrap on word boundaries before handing it the text.
 	m.descVP.SetWidth(vpW)
-	m.descVP.SetContent(m.descContent)
+	m.descVP.SetContent(lipgloss.Wrap(m.descContent, vpW, ""))
 
 	// 3. Compute layout with actual wrapped line count.
 	hints := layout.ContentHints{
@@ -542,11 +484,6 @@ func (m Model) View() tea.View {
 		return newAltView("Initializing...")
 	}
 
-	// Full-screen execution result view.
-	if m.showExecResult {
-		return newAltView(m.execResultView())
-	}
-
 	header := m.headerBar()
 
 	treePanel := m.borderedPanel(m.zone == ZoneTree, m.ly.TreeInnerW, m.ly.TreeInnerH,
@@ -576,35 +513,6 @@ func (m Model) headerBar() string {
 	pill := m.theme.Title.Render(" " + m.binaryName + " explore ")
 	return lipgloss.PlaceHorizontal(m.width, lipgloss.Left, pill,
 		lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Background(m.theme.BackgroundColor())))
-}
-
-func (m Model) execResultView() string {
-	// Header with status.
-	status := m.theme.Success.Render(" Command completed successfully ")
-	if m.lastExecErr != nil {
-		status = m.theme.Warning.Render(" Command failed ")
-	}
-	header := lipgloss.PlaceHorizontal(m.width, lipgloss.Left,
-		m.theme.Title.Render(" Output ")+"  "+status,
-		lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Background(m.theme.BackgroundColor())))
-
-	// Scrollable output viewport.
-	content := m.execVP.View()
-
-	// Scroll indicator.
-	scrollInfo := ""
-	if m.execVP.TotalLineCount() > m.execVP.Height() {
-		pct := 0
-		if m.execVP.TotalLineCount()-m.execVP.Height() > 0 {
-			pct = m.execVP.YOffset() * 100 / (m.execVP.TotalLineCount() - m.execVP.Height())
-		}
-		scrollInfo = m.theme.Dim.Render(fmt.Sprintf("  %d%%", pct))
-	}
-
-	footer := m.theme.Dim.Width(m.width).Render("  ↑/↓: scroll  q/Esc/Enter: back" + scrollInfo)
-
-	view := lipgloss.JoinVertical(lipgloss.Left, header, "", content, "", footer)
-	return m.theme.Base.Width(m.width).Height(m.height).Render(view)
 }
 
 // borderedPanel sizes content to exact inner dimensions, then wraps in a border.
@@ -694,9 +602,11 @@ func (m Model) treeBody() string {
 }
 
 func (m Model) descBody() string {
-	// Show flag details directly when flags zone is focused.
+	// Show flag details directly when flags zone is focused. Wrap to the panel
+	// inner width so a long flag usage line can't overflow the panel and blow
+	// up the surrounding layout (borderedPanel clips the height afterwards).
 	if flagContent := m.descBodyContent(); flagContent != "" {
-		return m.theme.Body.Render(flagContent)
+		return m.theme.Body.Width(m.ly.DescInnerW).Render(flagContent)
 	}
 	content := m.descVP.View()
 	if m.descVP.TotalLineCount() > m.descVP.Height() {
@@ -850,7 +760,7 @@ func windowText(s string, scroll, width int) string {
 
 func (m Model) footerHints() string {
 	if m.zone == ZoneFlags && m.editing {
-		return "Enter/Tab: confirm  │  Esc: cancel"
+		return "Enter/Tab: confirm  │  Esc: cancel  │  Ctrl+C: quit"
 	}
 	common := "Tab: next zone"
 	switch m.zone {
@@ -859,11 +769,8 @@ func (m Model) footerHints() string {
 	case ZoneDesc:
 		return common + "  │  ↑/↓: scroll  │  q: quit"
 	case ZoneFlags:
-		return common + "  │  ↑/↓: navigate  Enter: edit  Space: toggle bool"
+		return common + "  │  ↑/↓: navigate  Enter: edit  Space: toggle bool  │  q: quit"
 	case ZoneCommand:
-		if m.executionEnabled {
-			return common + "  │  Enter: run  c: copy  ←/→: scroll  │  q: quit"
-		}
 		return common + "  │  Enter: paste to terminal  c: copy  ←/→: scroll  │  q: quit"
 	}
 	return common + "  │  q: quit"

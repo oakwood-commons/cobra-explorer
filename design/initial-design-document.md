@@ -4,6 +4,11 @@
 > original architecture and intent. It is a historical snapshot and is **not**
 > kept in sync with subsequent implementation changes — later behavior may
 > diverge. For current behavior, consult the code and `README.md`.
+>
+> **Removed since this snapshot:** in-TUI command execution (`WithExecution`,
+> `internal/executor`, the execution result screen). Every reference to it below
+> is obsolete — Enter in the command bar now always pastes the command to the
+> shell. See `CHANGELOG.md`.
 
 ## Overview
 

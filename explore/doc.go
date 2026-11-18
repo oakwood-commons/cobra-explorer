@@ -1,6 +1,6 @@
 // Package explore provides an interactive TUI for Cobra-based CLI applications.
 // It lets users visually navigate the full command tree, inspect flags and
-// documentation, build commands interactively, and execute them.
+// documentation, and build commands interactively.
 //
 // Integration is a single function call:
 //

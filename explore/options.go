@@ -4,10 +4,9 @@ package explore
 type Option func(*config)
 
 type config struct {
-	binaryName       string
-	themeName        string
-	showHidden       bool
-	executionEnabled bool
+	binaryName string
+	themeName  string
+	showHidden bool
 }
 
 func defaultConfig() config {
@@ -43,14 +42,5 @@ func WithLightTheme() Option {
 func WithShowHidden(show bool) Option {
 	return func(c *config) {
 		c.showHidden = show
-	}
-}
-
-// WithExecution enables in-TUI command execution via Cobra.
-// When enabled, pressing Enter in the command bar executes the command
-// directly (suspending the TUI), then resumes after completion.
-func WithExecution(enabled bool) Option {
-	return func(c *config) {
-		c.executionEnabled = enabled
 	}
 }
